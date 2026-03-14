@@ -174,6 +174,18 @@ if (process.env.OPENCLAW_DEV_MODE === 'true') {
     config.gateway.controlUi.allowInsecureAuth = true;
 }
 
+// Ensure the Anthropic API key from env is written into the config.
+// OpenClaw 2026.3.13+ may prioritize config file credentials over env vars,
+// and R2-restored configs can contain stale provider entries.
+if (process.env.ANTHROPIC_API_KEY && config.models?.providers) {
+    for (const [name, provider] of Object.entries(config.models.providers)) {
+        if (provider.api === 'anthropic-messages' || name.includes('anthropic')) {
+            provider.apiKey = process.env.ANTHROPIC_API_KEY;
+            console.log('Patched API key for provider:', name);
+        }
+    }
+}
+
 // Legacy AI Gateway base URL override:
 // ANTHROPIC_BASE_URL is picked up natively by the Anthropic SDK,
 // so we don't need to patch the provider config. Writing a provider
