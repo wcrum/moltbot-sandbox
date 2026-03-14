@@ -164,8 +164,13 @@ if (process.env.OPENCLAW_GATEWAY_TOKEN) {
     config.gateway.auth.token = process.env.OPENCLAW_GATEWAY_TOKEN;
 }
 
+// Allow all origins since the Worker proxy handles auth via CF Access + gateway token.
+// OpenClaw 2026.3.13+ validates Origin header for the Control UI, but since requests
+// arrive through the Worker (different origin), we must whitelist them.
+config.gateway.controlUi = config.gateway.controlUi || {};
+config.gateway.controlUi.allowedOrigins = ['*'];
+
 if (process.env.OPENCLAW_DEV_MODE === 'true') {
-    config.gateway.controlUi = config.gateway.controlUi || {};
     config.gateway.controlUi.allowInsecureAuth = true;
 }
 
